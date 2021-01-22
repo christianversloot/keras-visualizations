@@ -1,24 +1,29 @@
-import keras
-from keras.datasets import mnist
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.utils.vis_utils import plot_model
+##
+## Read corresponding blog article at:
+## https://www.machinecurve.com/index.php/2019/10/07/how-to-visualize-a-model-with-keras
+##
+
+import tensorflow
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.utils import plot_model
 
 # Load MNIST dataset
 (input_train, target_train), (input_test, target_test) = mnist.load_data()
 
-# Reshape data based on channels first / channels last strategy.
-# This is dependent on whether you use TF, Theano or CNTK as backend.
-# Source: https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
-if K.image_data_format() == 'channels_first':
-    input_train = input_train.reshape(input_train.shape[0], 1, img_width, img_height)
-    input_test = input_test.reshape(input_test.shape[0], 1, img_width, img_height)
-    input_shape = (1, img_width, img_height)
-else:
-    input_train = input_train.reshape(input_train.shape[0], img_width, img_height, 1)
-    input_test = input_test.reshape(input_test.shape[0], img_width, img_height, 1)
-    input_shape = (img_width, img_height, 1)
+# Set input shape
+sample_shape = input_train[0].shape
+img_width, img_height = sample_shape[0], sample_shape[1]
+input_shape = (img_width, img_height, 1)
+
+# Number of classes
+no_classes = 10
+
+# Reshape data 
+input_train = input_train.reshape(len(input_train), input_shape[0], input_shape[1], input_shape[2])
+input_test  = input_test.reshape(len(input_test), input_shape[0], input_shape[1], input_shape[2])
 
 # Create the model
 model = Sequential()
@@ -32,4 +37,8 @@ model.add(Flatten())
 model.add(Dense(256, activation='relu'))
 model.add(Dense(no_classes, activation='softmax'))
 
+# Vertical plot
 plot_model(model, to_file='model.png')
+
+# Horizontal plot
+plot_model(model, to_file='model_horizontal.png', rankdir='LR')
